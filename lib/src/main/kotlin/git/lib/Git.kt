@@ -3,8 +3,38 @@
  */
 package git.lib
 
+import git.lib.domain.Commit
+import git.lib.domain.Tree
+
 class Git {
-    fun someLibraryMethod(): Boolean {
-        return true
+    private val commits: List<Commit> = ArrayList()
+
+    fun createCommit(tree: Tree, author: String, message: String) {
+        val commit = Commit(tree, author, message)
+        commits.addLast(commit)
+    }
+
+    fun listCommits(): List<Commit> {
+        return commits
+    }
+
+    fun findCommitByHash(hash: String): Commit? {
+        return commits.find { commit: Commit -> commit.hash == hash }
+    }
+
+    fun findCommitsByAuthor(author: String): List<Commit> {
+        return commits.filter { commit: Commit -> commit.author == author }
+    }
+
+    fun findCommitsByMessage(message: String): List<Commit> {
+        return commits.filter { commit: Commit -> commit.message == message }
+    }
+
+    fun findCommitsBeforeTimestamp(timestamp: Long): List<Commit> {
+        return commits.filter { commit: Commit -> commit.timestamp < timestamp }
+    }
+
+    fun findCommitsAfterTimestamp(timestamp: Long): List<Commit> {
+        return commits.filter { commit: Commit -> commit.timestamp > timestamp }
     }
 }
