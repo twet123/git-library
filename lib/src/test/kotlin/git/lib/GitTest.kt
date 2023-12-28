@@ -87,6 +87,7 @@ class GitTest {
         val tree = Tree()
         git.createCommit(tree, author, message)
         git.createCommit(tree, author, message)
+        Thread.sleep(10)
         val timestamp = System.currentTimeMillis()
         git.createCommit(tree, author, message)
 
@@ -103,6 +104,7 @@ class GitTest {
         git.createCommit(tree, author, message)
         git.createCommit(tree, author, message)
         val timestamp = System.currentTimeMillis()
+        Thread.sleep(10)
         git.createCommit(tree, author, message)
 
         val foundCommits = git.findCommitsAfterTimestamp(timestamp)
