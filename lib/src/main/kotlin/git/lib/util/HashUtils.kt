@@ -13,7 +13,7 @@ object HashUtils {
     private fun bytesToHex(bytes: ByteArray): String {
         val result = StringBuilder()
         bytes.forEach { byte: Byte ->
-            result.append(String.format("%02x"), byte)
+            result.append(String.format("%02x", byte))
         }
         return result.toString()
     }
