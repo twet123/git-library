@@ -3,14 +3,35 @@
  */
 package git.lib
 
+import git.lib.domain.Blob
 import git.lib.domain.Commit
 import git.lib.domain.Tree
 
 class Git {
     private val commits: List<Commit> = ArrayList()
+    private val blobEntries: HashMap<String, Blob> = HashMap()
+
+    private fun processTree(tree: Tree, newEntries: Tree) {
+        tree.entries.forEach { entry ->
+            if (entry.value is Blob) {
+                val blobHash: String = (entry.value as Blob).hash
+                if (blobEntries.containsKey(blobHash)) {
+                    newEntries.addEntry(entry.key, blobEntries[blobHash]!!)
+                } else {
+                    newEntries.addEntry(entry.key, entry.value)
+                    blobEntries[blobHash] = entry.value as Blob
+                }
+            } else {
+                processTree(entry.value as Tree, newEntries)
+            }
+        }
+    }
 
     fun createCommit(tree: Tree, author: String, message: String) {
-        val commit = Commit(tree, author, message)
+        val newEntries = Tree()
+        processTree(tree, newEntries)
+
+        val commit = Commit(newEntries, author, message)
         commits.addLast(commit)
     }
 
@@ -27,7 +48,7 @@ class Git {
     }
 
     fun findCommitsByMessage(message: String): List<Commit> {
-        return commits.filter { commit: Commit -> commit.message == message }
+        return commits.filter { commit: Commit -> commit.message.contains(message) }
     }
 
     fun findCommitsBeforeTimestamp(timestamp: Long): List<Commit> {
@@ -36,5 +57,9 @@ class Git {
 
     fun findCommitsAfterTimestamp(timestamp: Long): List<Commit> {
         return commits.filter { commit: Commit -> commit.timestamp > timestamp }
+    }
+
+    fun getBlobEntriesSize(): Int {
+        return blobEntries.size
     }
 }
