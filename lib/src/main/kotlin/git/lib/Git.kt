@@ -123,4 +123,21 @@ class Git {
     fun getBlobEntriesSize(): Int {
         return blobEntries.size
     }
+
+    fun createBranch(name: String) {
+        if (head == "master" && !branches.containsKey(head)) {
+            throw IllegalStateException("You must create an initial commit first!")
+        }
+
+        val startingCommit = branches[head]
+        branches[name] = startingCommit!!
+    }
+
+    fun switchToBranch(name: String) {
+        if (!branches.containsKey(name)) {
+            throw IllegalArgumentException("There is no such branch!")
+        }
+
+        head = name
+    }
 }
