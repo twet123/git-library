@@ -159,6 +159,19 @@ class GitTest {
     }
 
     @Test
+    fun testCreateNewBranch() {
+        val git = Git()
+        val tree = Tree()
+        git.createCommit(tree, author, message)
+
+        git.createBranch("test-branch")
+
+        val branches = git.getBranches()
+        assertEquals(branches.size, 2)
+        assertTrue(branches.contains("test-branch"))
+    }
+
+    @Test
     fun testBranching() {
         val git = Git()
         val tree = Tree()
