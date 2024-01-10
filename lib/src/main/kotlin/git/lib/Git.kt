@@ -32,8 +32,7 @@ class Git {
         val newEntries = Tree()
         processTree(tree, newEntries)
 
-        val prevCommit: Commit?
-        prevCommit = if (head == "master" && !branches.containsKey(head)) { // initial commit
+        val prevCommit = if (head == "master" && !branches.containsKey(head)) { // initial commit
             null
         } else {
             branches[head]
