@@ -8,8 +8,9 @@ import git.lib.domain.Commit
 import git.lib.domain.Tree
 
 class Git {
-    private val commits: List<Commit> = ArrayList()
     private val blobEntries: HashMap<String, Blob> = HashMap()
+    private val branches: HashMap<String, Commit> = HashMap()
+    private var head: String = "master"
 
     private fun processTree(tree: Tree, newEntries: Tree) {
         tree.entries.forEach { entry ->
@@ -31,32 +32,92 @@ class Git {
         val newEntries = Tree()
         processTree(tree, newEntries)
 
-        val commit = Commit(newEntries, author, message)
-        commits.addLast(commit)
+        val prevCommit: Commit?
+        prevCommit = if (head == "master" && !branches.containsKey(head)) { // initial commit
+            null
+        } else {
+            branches[head]
+        }
+
+        val commit = Commit(newEntries, author, message, prevCommit)
+        branches[head] = commit
     }
 
     fun listCommits(): List<Commit> {
+        val commits = ArrayList<Commit>()
+
+        var currentCommit = branches[head]
+        while (currentCommit != null) {
+            commits.add(currentCommit)
+            currentCommit = currentCommit.parent
+        }
+
         return commits
     }
 
     fun findCommitByHash(hash: String): Commit? {
-        return commits.find { commit: Commit -> commit.hash == hash }
+        var currentCommit = branches[head]
+        while (currentCommit != null) {
+            if (currentCommit.hash == hash)
+                return currentCommit
+            currentCommit = currentCommit.parent
+        }
+
+        return null
     }
 
     fun findCommitsByAuthor(author: String): List<Commit> {
-        return commits.filter { commit: Commit -> commit.author == author }
+        val commits = ArrayList<Commit>()
+
+        var currentCommit = branches[head]
+        while (currentCommit != null) {
+            if (currentCommit.author == author)
+                commits.add(currentCommit)
+            currentCommit = currentCommit.parent
+        }
+
+        return commits
     }
 
     fun findCommitsByMessage(message: String): List<Commit> {
-        return commits.filter { commit: Commit -> commit.message.contains(message) }
+        val commits = ArrayList<Commit>()
+
+        var currentCommit = branches[head]
+        while (currentCommit != null) {
+            if (currentCommit.message.contains(message))
+                commits.add(currentCommit)
+            currentCommit = currentCommit.parent
+        }
+
+        return commits
     }
 
     fun findCommitsBeforeTimestamp(timestamp: Long): List<Commit> {
-        return commits.filter { commit: Commit -> commit.timestamp < timestamp }
+        val commits = ArrayList<Commit>()
+
+        var currentCommit = branches[head]
+        while (currentCommit != null) {
+            if (currentCommit.timestamp < timestamp)
+                commits.add(currentCommit)
+            currentCommit = currentCommit.parent
+        }
+
+        return commits
     }
 
     fun findCommitsAfterTimestamp(timestamp: Long): List<Commit> {
-        return commits.filter { commit: Commit -> commit.timestamp > timestamp }
+        val commits = ArrayList<Commit>()
+
+        var currentCommit = branches[head]
+        while (currentCommit != null) {
+            if (currentCommit.timestamp > timestamp)
+                commits.add(currentCommit)
+            else
+                return commits
+            currentCommit = currentCommit.parent
+        }
+
+        return commits
     }
 
     fun getBlobEntriesSize(): Int {
