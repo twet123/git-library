@@ -6,6 +6,7 @@ package git.lib
 import git.lib.domain.Blob
 import git.lib.domain.Tree
 import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.assertThrows
 import kotlin.test.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -137,5 +138,47 @@ class GitTest {
         git.createCommit(workTree1, author, message)
 
         assertEquals(git.getBlobEntriesSize(), 3)
+    }
+
+    @Test
+    fun testInitialCommitException() {
+        val git = Git()
+
+        val exception = assertThrows<IllegalStateException> { git.createBranch("feature/git") }
+        assertNotNull(exception.message)
+        assertTrue(exception.message!!.contains("You must create an initial commit first!"))
+    }
+
+    @Test
+    fun testSwitchToNonExistentBranch() {
+        val git = Git()
+
+        val exception = assertThrows<IllegalArgumentException> { git.switchToBranch("feature/git") }
+        assertNotNull(exception.message)
+        assertTrue(exception.message!!.contains("There is no such branch!"))
+    }
+
+    @Test
+    fun testBranching() {
+        val git = Git()
+        val tree = Tree()
+        git.createCommit(tree, author, message)
+        git.createCommit(tree, author, message)
+
+        git.createBranch("feature/git")
+        git.switchToBranch("feature/git")
+        git.createCommit(tree, author, message)
+        git.createCommit(tree, author, message)
+        val branchCommits = git.listCommits()
+        assertEquals(branchCommits.size, 4)
+
+        git.switchToBranch("master")
+        val masterCommits = git.listCommits()
+        assertEquals(masterCommits.size, 2)
+
+        git.switchToBranch("feature/git")
+        git.createCommit(tree, author, message)
+        val branchCommits2 = git.listCommits()
+        assertEquals(branchCommits2.size, 5)
     }
 }
