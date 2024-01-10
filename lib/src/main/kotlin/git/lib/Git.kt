@@ -133,6 +133,10 @@ class Git {
         branches[name] = startingCommit!!
     }
 
+    fun getBranches(): Set<String> {
+        return branches.keys
+    }
+
     fun switchToBranch(name: String) {
         if (!branches.containsKey(name)) {
             throw IllegalArgumentException("There is no such branch!")
